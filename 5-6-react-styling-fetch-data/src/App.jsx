@@ -178,6 +178,91 @@ END OF LAB INSTRUCTIONS
 ===================================================================
 */
 
+// import { useEffect, useState } from "react";
+// import { Container, Spinner, Alert } from "react-bootstrap";
+// import SearchBar from "./components/SearchBar";
+// import UserList from "./components/UserList";
+// import UserModal from "./components/UserModal";
+// import "./index.css";
+
+// export default function App() {
+//   // State variables (already complete for students)
+//   const [users, setUsers] = useState([]);
+//   const [filteredUsers, setFilteredUsers] = useState([]);
+//   const [loading, setLoading] = useState(true);
+//   const [error, setError] = useState(null);
+
+//   const [searchTerm, setSearchTerm] = useState("");
+//   const [showModal, setShowModal] = useState(false);
+//   const [selectedUser, setSelectedUser] = useState(null);
+
+//   /* =========================================================
+//      TODO 2.1 — FETCH USERS (Runs once)
+//      File: src/App.jsx
+//      ---------------------------------------------------------
+//      Implement fetch logic inside this useEffect.
+//      ========================================================= */
+//   useEffect(() => {
+//     // TODO 2.1: Implement fetching users here (see lab instructions)
+//   }, []);
+
+//   /* =========================================================
+//      TODO 2.2 — FILTER USERS BY NAME
+//      File: src/App.jsx
+//      ---------------------------------------------------------
+//      Implement filtering logic inside this useEffect.
+//      Dependency array MUST be: [searchTerm, users]
+//      ========================================================= */
+//   useEffect(() => {
+//     // TODO 2.2: Implement filtering users here (see lab instructions)
+//   }, [searchTerm, users]);
+
+//   // Modal handlers (already complete)
+//   function handleUserClick(user) {
+//     setSelectedUser(user);
+//     setShowModal(true);
+//   }
+
+//   function handleCloseModal() {
+//     setShowModal(false);
+//     setSelectedUser(null);
+//   }
+
+//   return (
+//     <div className="app">
+//       {/* TODO 1.1: Set header className EXACTLY as in lab instructions */}
+//       <header className="">
+//         <Container>
+//           <h1 className="h2 mb-0">User Management Dashboard</h1>
+//           <p className="mb-0 opacity-75">Search users and view details</p>
+//         </Container>
+//       </header>
+
+//       <Container>
+//         <SearchBar searchTerm={searchTerm} onSearchChange={setSearchTerm} />
+
+//         {/* Loading & Error UI (already complete) */}
+//         {loading && <Spinner animation="border" />}
+//         {error && <Alert variant="danger">{error}</Alert>}
+
+//         {/* Show list only when not loading and no error */}
+//         {!loading && !error && (
+//           <UserList users={filteredUsers} onUserClick={handleUserClick} />
+//         )}
+
+//         <UserModal show={showModal} user={selectedUser} onHide={handleCloseModal} />
+//       </Container>
+
+//       {/* TODO 1.1: Set footer className EXACTLY as in lab instructions */}
+//       <footer className="">
+//         <Container>
+//           <small className="text-muted">SWE 363 — React Lab</small>
+//         </Container>
+//       </footer>
+//     </div>
+//   );
+// }
+
 import { useEffect, useState } from "react";
 import { Container, Spinner, Alert } from "react-bootstrap";
 import SearchBar from "./components/SearchBar";
@@ -203,7 +288,28 @@ export default function App() {
      Implement fetch logic inside this useEffect.
      ========================================================= */
   useEffect(() => {
-    // TODO 2.1: Implement fetching users here (see lab instructions)
+    const fetchUsers = async () => {
+      setLoading(true);
+      setError(null);
+
+      try {
+        const res = await fetch("https://jsonplaceholder.typicode.com/users");
+
+        if (!res.ok) {
+          throw new Error(`Request failed with status ${res.status}`);
+        }
+
+        const data = await res.json();
+        setUsers(data);
+        setFilteredUsers(data);
+      } catch (err) {
+        setError(err.message);
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    fetchUsers();
   }, []);
 
   /* =========================================================
@@ -214,7 +320,14 @@ export default function App() {
      Dependency array MUST be: [searchTerm, users]
      ========================================================= */
   useEffect(() => {
-    // TODO 2.2: Implement filtering users here (see lab instructions)
+    if (searchTerm.trim() === "") {
+      setFilteredUsers(users);
+    } else {
+      const filtered = users.filter((user) =>
+        user.name.toLowerCase().includes(searchTerm.toLowerCase())
+      );
+      setFilteredUsers(filtered);
+    }
   }, [searchTerm, users]);
 
   // Modal handlers (already complete)
@@ -231,7 +344,7 @@ export default function App() {
   return (
     <div className="app">
       {/* TODO 1.1: Set header className EXACTLY as in lab instructions */}
-      <header className="">
+      <header className="bg-primary text-white py-3 mb-4 shadow">
         <Container>
           <h1 className="h2 mb-0">User Management Dashboard</h1>
           <p className="mb-0 opacity-75">Search users and view details</p>
@@ -254,7 +367,7 @@ export default function App() {
       </Container>
 
       {/* TODO 1.1: Set footer className EXACTLY as in lab instructions */}
-      <footer className="">
+      <footer className="bg-light py-4 mt-5">
         <Container>
           <small className="text-muted">SWE 363 — React Lab</small>
         </Container>
